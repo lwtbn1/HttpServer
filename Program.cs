@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -41,8 +42,27 @@ namespace HttpServer
                 var context = _listener.EndGetContext(ar);
                 var request = context.Request;
                 var queryStr = request.QueryString;
+
                 Console.WriteLine(queryStr.GetValues("p")[0]);
                 listener.BeginGetContext(GetContextCallback, listener);
+
+
+
+                HttpListenerResponse response = context.Response;
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.ContentType = "application/json;charset=UTF-8";
+                response.ContentEncoding = Encoding.UTF8;
+                response.AppendHeader("Content-Type", "application/json;charset=UTF-8");
+
+               
+
+                using (StreamWriter writer = new StreamWriter(response.OutputStream, Encoding.UTF8))
+                {
+                    writer.Write("succ");
+                    writer.Close();
+                    response.Close();
+                }
+
             }
         }
 
