@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HttpServer.Datas;
+using HttpServer.Services;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,15 +16,12 @@ namespace HttpServer
 {
     internal class Program
     {
-        static HttpListener listener;
+        
         static void Main(string[] args)
         {
-            listener = new HttpListener();
-            listener.Prefixes.Add("http://localhost:30000/");
-            listener.Start();
-
-            listener.BeginGetContext(GetContextCallback, listener);
-
+            DataLogic.Ins.Load();
+            LogicMain.Ins.Regist();
+            HttpService.Ins.Start();
 
             Thread mainThrea = new Thread(() => { 
                 while (true)
@@ -34,37 +33,7 @@ namespace HttpServer
             
         }
 
-        static void GetContextCallback(IAsyncResult ar)
-        {
-            var _listener = ar.AsyncState as HttpListener;
-            if(_listener.IsListening)
-            {
-                var context = _listener.EndGetContext(ar);
-                var request = context.Request;
-                var queryStr = request.QueryString;
-
-                Console.WriteLine(queryStr.GetValues("p")[0]);
-                listener.BeginGetContext(GetContextCallback, listener);
-
-
-
-                HttpListenerResponse response = context.Response;
-                response.StatusCode = (int)HttpStatusCode.OK;
-                response.ContentType = "application/json;charset=UTF-8";
-                response.ContentEncoding = Encoding.UTF8;
-                response.AppendHeader("Content-Type", "application/json;charset=UTF-8");
-
-               
-
-                using (StreamWriter writer = new StreamWriter(response.OutputStream, Encoding.UTF8))
-                {
-                    writer.Write("succ");
-                    writer.Close();
-                    response.Close();
-                }
-
-            }
-        }
+        
 
     }
 }
